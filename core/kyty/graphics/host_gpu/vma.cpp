@@ -195,8 +195,9 @@ static std::array<VkDeviceSize, VK_MAX_MEMORY_HEAPS> HeapSizeLimits(const Graphi
 		const uint64_t reserve = std::min(DesktopReserve, available / 4);
 		const uint64_t limit   = forced != UINT64_MAX ? std::min(forced, size) : available - reserve;
 		limits[heap] = limit;
-		LOGF("Vulkan memory: device-local heap %u of %" PRIu64 " MiB limited to %" PRIu64 " MiB (%s)\n", heap,
-		     size >> 20u, limit >> 20u, forced != UINT64_MAX ? "KYTY_MEMORY_BUDGET_MB" : "budget less the desktop reserve");
+		std::fprintf(stderr, "Vulkan memory: device-local heap %u of %" PRIu64 " MiB limited to %" PRIu64 " MiB (%s)\n",
+		             heap, size >> 20u, limit >> 20u,
+		             forced != UINT64_MAX ? "KYTY_MEMORY_BUDGET_MB" : "budget less the desktop reserve");
 	}
 	return limits;
 }
@@ -233,8 +234,8 @@ bool GraphicContext::CreateAllocator() {
 		info.pHeapSizeLimit = nullptr;
 		const auto spill    = static_cast<vk::Result>(vmaCreateAllocator(&info, &spill_allocator));
 		if (spill != vk::Result::eSuccess) {
-			LOGF("Vulkan memory: no spill allocator (%s): an allocation past the heap limits fails\n",
-			     vk::to_string(spill).c_str());
+			std::fprintf(stderr, "Vulkan memory: no spill allocator (%s): an allocation past the heap limits fails\n",
+			             vk::to_string(spill).c_str());
 			spill_allocator = nullptr;
 		}
 	}
